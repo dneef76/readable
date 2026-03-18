@@ -13,9 +13,10 @@ interface EditorProps {
   content: string;
   onSave: (markdown: string) => void;
   onChange: (dirty: boolean) => void;
+  onContentChange?: (markdown: string) => void;
 }
 
-export function Editor({ content, onSave, onChange }: EditorProps) {
+export function Editor({ content, onSave, onChange, onContentChange }: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const savedContentRef = useRef(content);
@@ -57,6 +58,9 @@ export function Editor({ content, onSave, onChange }: EditorProps) {
         view.updateState(newState);
         if (transaction.docChanged) {
           onChange(true);
+          if (onContentChange) {
+            onContentChange(serializeMarkdown(newState.doc));
+          }
         }
       },
     });
