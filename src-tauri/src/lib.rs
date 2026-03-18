@@ -6,6 +6,7 @@ use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri::{Emitter, Manager};
 
 struct WatcherState(Mutex<Option<RecommendedWatcher>>);
+struct InitialFile(Mutex<Option<String>>);
 
 #[tauri::command]
 fn read_file(path: String) -> Result<String, String> {
@@ -46,6 +47,13 @@ fn stop_watching(app_handle: tauri::AppHandle) -> Result<(), String> {
     let state = app_handle.state::<WatcherState>();
     *state.0.lock().unwrap() = None;
     Ok(())
+}
+
+#[tauri::command]
+fn get_initial_file(app_handle: tauri::AppHandle) -> Option<String> {
+    let state = app_handle.state::<InitialFile>();
+    let result = state.0.lock().unwrap().take();
+    result
 }
 
 fn build_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -110,16 +118,18 @@ fn build_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .manage(WatcherState(Mutex::new(None)))
+        .manage(InitialFile(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![
             read_file,
             write_file,
             watch_file,
             stop_watching,
+            get_initial_file,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -140,16 +150,26 @@ pub fn run() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("error while building tauri application")
-        .run(|app_handle, event| {
-            if let tauri::RunEvent::Opened { urls } = event {
-                for url in urls {
-                    if let Ok(path) = url.to_file_path() {
-                        if let Some(path_str) = path.to_str() {
-                            let _ = app_handle.emit("open-file", path_str.to_string());
-                        }
+        .expect("error while building tauri application");
+
+    // Check if launched with a file path argument (e.g. from Finder double-click)
+    if let Some(path) = std::env::args().nth(1) {
+        if path.ends_with(".md") || path.ends_with(".markdown") {
+            let state = app.state::<InitialFile>();
+            *state.0.lock().unwrap() = Some(path);
+        }
+    }
+
+    app.run(|app_handle, event| {
+        if let tauri::RunEvent::Opened { urls } = event {
+            // This fires when a file is opened while the app is already running
+            for url in urls {
+                if let Ok(path) = url.to_file_path() {
+                    if let Some(path_str) = path.to_str() {
+                        let _ = app_handle.emit("open-file", path_str.to_string());
                     }
                 }
             }
-        });
+        }
+    });
 }

@@ -104,7 +104,14 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleOpen]);
 
-  // Listen for "open-file" events (Finder double-click)
+  // Check for initial file (passed via Finder double-click on launch)
+  useEffect(() => {
+    invoke<string | null>("get_initial_file").then((path) => {
+      if (path) openFile(path);
+    });
+  }, [openFile]);
+
+  // Listen for "open-file" events (Finder double-click while app is running)
   useEffect(() => {
     const unlisten = listen<string>("open-file", (event) => {
       openFile(event.payload);
