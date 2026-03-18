@@ -133,8 +133,9 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                // Notify frontend about close (for save prompt)
+                // Don't prevent close — let it proceed naturally
                 let _ = window.emit("close-requested", ());
             }
         })

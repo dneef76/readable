@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { keymap } from "prosemirror-keymap";
@@ -7,6 +7,7 @@ import { baseKeymap, selectAll } from "prosemirror-commands";
 import { dropCursor } from "prosemirror-dropcursor";
 import { gapCursor } from "prosemirror-gapcursor";
 import { parseMarkdown, serializeMarkdown } from "./markdown";
+import "prosemirror-view/style/prosemirror.css";
 import "./editor.css";
 
 interface EditorProps {
@@ -20,11 +21,21 @@ export function Editor({ content, onSave, onChange, onContentChange }: EditorPro
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const savedContentRef = useRef(content);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!editorRef.current) return;
 
-    const doc = parseMarkdown(content);
+    let doc;
+    try {
+      doc = parseMarkdown(content);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("Failed to parse markdown:", msg);
+      setError(msg);
+      return;
+    }
+    setError(null);
     savedContentRef.current = content;
 
     const state = EditorState.create({
@@ -89,6 +100,17 @@ export function Editor({ content, onSave, onChange, onContentChange }: EditorPro
       viewRef.current = null;
     };
   }, [content, onSave, onChange]);
+
+  if (error) {
+    return (
+      <div className="editor-wrapper">
+        <div className="editor-container" style={{ color: "red", padding: "2rem" }}>
+          <h2>Failed to parse markdown</h2>
+          <pre style={{ whiteSpace: "pre-wrap", marginTop: "1rem" }}>{error}</pre>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="editor-wrapper">

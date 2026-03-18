@@ -14,7 +14,16 @@ const md = markdownit("default", { html: false });
 export const markdownParser = new MarkdownParser(
   schema,
   md,
-  defaultMarkdownParser.tokens
+  {
+    ...defaultMarkdownParser.tokens,
+    // Table token mappings (markdown-it produces these, but prosemirror-markdown doesn't handle them by default)
+    table: { block: "table" },
+    thead: { ignore: true },
+    tbody: { ignore: true },
+    tr: { block: "table_row" },
+    th: { block: "table_header" },
+    td: { block: "table_cell" },
+  }
 );
 
 export const markdownSerializer = new MarkdownSerializer(
