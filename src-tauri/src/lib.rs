@@ -162,11 +162,15 @@ pub fn run() {
 
     app.run(|app_handle, event| {
         if let tauri::RunEvent::Opened { urls } = event {
-            // This fires when a file is opened while the app is already running
             for url in urls {
                 if let Ok(path) = url.to_file_path() {
                     if let Some(path_str) = path.to_str() {
-                        let _ = app_handle.emit("open-file", path_str.to_string());
+                        let path_string = path_str.to_string();
+                        // Try to emit to frontend (works if already mounted)
+                        let _ = app_handle.emit("open-file", path_string.clone());
+                        // Also store in state (frontend queries on mount if event was missed)
+                        let state = app_handle.state::<InitialFile>();
+                        *state.0.lock().unwrap() = Some(path_string);
                     }
                 }
             }
