@@ -2,6 +2,7 @@ use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri::{Emitter, Manager};
 
 struct WatcherState(Mutex<Option<RecommendedWatcher>>);
@@ -47,6 +48,66 @@ fn stop_watching(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+fn build_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    let open = MenuItemBuilder::with_id("open", "Open\u{2026}")
+        .accelerator("CmdOrCtrl+O")
+        .build(app)?;
+    let save = MenuItemBuilder::with_id("save", "Save")
+        .accelerator("CmdOrCtrl+S")
+        .build(app)?;
+    let close = MenuItemBuilder::with_id("close", "Close")
+        .accelerator("CmdOrCtrl+W")
+        .build(app)?;
+
+    let file_menu = SubmenuBuilder::new(app, "File")
+        .item(&open)
+        .item(&save)
+        .separator()
+        .item(&close)
+        .build()?;
+
+    let edit_menu = SubmenuBuilder::new(app, "Edit")
+        .undo()
+        .redo()
+        .separator()
+        .cut()
+        .copy()
+        .paste()
+        .select_all()
+        .build()?;
+
+    let window_menu = SubmenuBuilder::new(app, "Window")
+        .minimize()
+        .build()?;
+
+    let menu = MenuBuilder::new(app)
+        .item(&file_menu)
+        .item(&edit_menu)
+        .item(&window_menu)
+        .build()?;
+
+    app.set_menu(menu)?;
+
+    app.on_menu_event(move |app_handle, event| {
+        match event.id().as_ref() {
+            "open" => {
+                let _ = app_handle.emit("menu-open", ());
+            }
+            "save" => {
+                let _ = app_handle.emit("menu-save", ());
+            }
+            "close" => {
+                if let Some(w) = app_handle.get_webview_window("main") {
+                    let _ = w.close();
+                }
+            }
+            _ => {}
+        }
+    });
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -68,7 +129,14 @@ pub fn run() {
                         .build(),
                 )?;
             }
+            build_menu(app)?;
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.emit("close-requested", ());
+            }
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
