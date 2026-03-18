@@ -53,6 +53,23 @@ export function Editor({ content, onSave, onChange, onContentChange }: EditorPro
 
     const view = new EditorView(editorRef.current, {
       state,
+      handleDOMEvents: {
+        click: (_view, event) => {
+          const target = event.target as HTMLElement;
+          const link = target.closest("a");
+          if (link && event.metaKey) {
+            event.preventDefault();
+            const href = link.getAttribute("href");
+            if (href) {
+              import("@tauri-apps/plugin-shell").then(({ open }) => {
+                open(href);
+              });
+            }
+            return true;
+          }
+          return false;
+        },
+      },
       dispatchTransaction(transaction) {
         const newState = view.state.apply(transaction);
         view.updateState(newState);
