@@ -35,3 +35,15 @@ html, body {
 }
 
 #root { height: 100%; }
+
+.app-root { height: 100%; position: relative; }
+.app-root.drag-over::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  border: 3px dashed var(--accent);
+  border-radius: 8px;
+  background: rgba(0, 102, 204, 0.05);
+  pointer-events: none;
+  z-index: 9999;
+}
