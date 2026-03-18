@@ -1,0 +1,54 @@
+.editor-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.editor-container {
+  width: 100%;
+  max-width: 720px;
+}
+
+.ProseMirror {
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-primary);
+  cursor: text;
+}
+
+.ProseMirror:focus { outline: none; }
+
+.ProseMirror h1 { font-size: 2em; font-weight: 700; margin: 1.5em 0 0.5em; color: var(--text-primary); }
+.ProseMirror h2 { font-size: 1.5em; font-weight: 600; margin: 1.4em 0 0.4em; color: var(--text-primary); }
+.ProseMirror h3 { font-size: 1.25em; font-weight: 600; margin: 1.2em 0 0.3em; color: var(--text-primary); }
+.ProseMirror h4, .ProseMirror h5, .ProseMirror h6 { font-size: 1.1em; font-weight: 600; margin: 1em 0 0.3em; color: var(--text-secondary); }
+
+.ProseMirror p { margin: 0 0 0.8em; }
+.ProseMirror strong { font-weight: 600; }
+.ProseMirror em { font-style: italic; color: var(--text-comment); }
+
+.ProseMirror a { color: var(--accent); text-decoration: none; }
+.ProseMirror a:hover { text-decoration: underline; }
+
+.ProseMirror pre { background: var(--bg-code); border-radius: 6px; padding: 1em; overflow-x: auto; margin: 1em 0; }
+.ProseMirror pre code { font-family: "SF Mono", "Menlo", "Monaco", monospace; font-size: 13px; line-height: 1.5; color: var(--text-primary); }
+.ProseMirror code { font-family: "SF Mono", "Menlo", "Monaco", monospace; font-size: 0.9em; background: var(--bg-code); padding: 0.15em 0.3em; border-radius: 3px; }
+
+.ProseMirror blockquote { border-left: 3px solid var(--border); margin: 1em 0; padding: 0.5em 0 0.5em 1em; color: var(--text-secondary); }
+
+.ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 0.5em 0; }
+.ProseMirror li { margin: 0.2em 0; }
+
+.ProseMirror table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14px; }
+.ProseMirror th, .ProseMirror td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+.ProseMirror th { background: var(--bg-table-header); font-weight: 600; }
+.ProseMirror tr:nth-child(even) td { background: var(--bg-table-stripe); }
+
+.ProseMirror hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+.ProseMirror img { max-width: 100%; height: auto; border-radius: 4px; margin: 1em 0; }
+.ProseMirror .ProseMirror-selectednode { outline: 2px solid var(--accent); }
+.ProseMirror .ProseMirror-gapcursor:after { border-top: 1px solid var(--text-primary); }
