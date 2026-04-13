@@ -10,6 +10,7 @@ function App() {
   const [content, setContent] = useState<string>("");
   const [isDirty, setIsDirty] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [fontSize, setFontSize] = useState(15);
   const contentRef = useRef<string>(content);
 
   const updateTitle = useCallback((path: string | null, dirty: boolean) => {
@@ -92,12 +93,24 @@ function App() {
     contentRef.current = markdown;
   }, []);
 
-  // Keyboard shortcut: Cmd+O
+  // Keyboard shortcuts: Cmd+O, Cmd+=/-, Cmd+0
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey && e.key === "o") {
         e.preventDefault();
         handleOpen();
+      }
+      if (e.metaKey && (e.key === "=" || e.key === "+")) {
+        e.preventDefault();
+        setFontSize((s) => Math.min(s + 1, 28));
+      }
+      if (e.metaKey && e.key === "-") {
+        e.preventDefault();
+        setFontSize((s) => Math.max(s - 1, 10));
+      }
+      if (e.metaKey && e.key === "0") {
+        e.preventDefault();
+        setFontSize(15);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -241,6 +254,7 @@ function App() {
           onSave={handleSave}
           onChange={handleChange}
           onContentChange={handleContentChange}
+          fontSize={fontSize}
         />
       ) : (
         <div

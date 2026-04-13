@@ -15,9 +15,10 @@ interface EditorProps {
   onSave: (markdown: string) => void;
   onChange: (dirty: boolean) => void;
   onContentChange?: (markdown: string) => void;
+  fontSize?: number;
 }
 
-export function Editor({ content, onSave, onChange, onContentChange }: EditorProps) {
+export function Editor({ content, onSave, onChange, onContentChange, fontSize }: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const savedContentRef = useRef(content);
@@ -113,7 +114,10 @@ export function Editor({ content, onSave, onChange, onContentChange }: EditorPro
   }
 
   return (
-    <div className="editor-wrapper">
+    <div
+      className="editor-wrapper"
+      style={fontSize ? { "--editor-font-size": `${fontSize}px` } as React.CSSProperties : undefined}
+    >
       <div className="editor-container" ref={editorRef} />
     </div>
   );

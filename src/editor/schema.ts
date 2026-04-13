@@ -5,7 +5,7 @@ import { tableNodes } from "prosemirror-tables";
 const baseNodes = markdownSchema.spec.nodes;
 const tables = tableNodes({
   tableGroup: "block",
-  cellContent: "block+",
+  cellContent: "inline*",
   cellAttributes: {},
 });
 

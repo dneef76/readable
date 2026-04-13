@@ -14,7 +14,7 @@
 .ProseMirror {
   outline: none;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  font-size: 15px;
+  font-size: var(--editor-font-size, 15px);
   line-height: 1.65;
   color: var(--text-primary);
   cursor: text;
